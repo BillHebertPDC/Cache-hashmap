@@ -1,0 +1,209 @@
+{
+  "info": {
+    "_postman_id": "89b2c267-5e76-4ca2-9b88-56a6b37c4dd1",
+    "name": "MeuMapa - API de Cache",
+    "description": "Coleção para demonstrar MISS, HIT, LRU, TTL, invalidação e estatísticas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Cadastrar 7 conteúdos",
+      "description": "Execute os sete cadastros antes de testar o cache. Os IDs serão gerados pelo H2 em ordem começando em 1.",
+      "item": [
+        {
+          "name": "Cadastrar conteúdo 1",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Conteúdo 1\",\n  \"corpo\": \"Texto de exemplo 1\",\n  \"autor\": \"Ana\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/conteudos" }
+          }
+        },
+        {
+          "name": "Cadastrar conteúdo 2",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Conteúdo 2\",\n  \"corpo\": \"Texto de exemplo 2\",\n  \"autor\": \"Bruno\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/conteudos" }
+          }
+        },
+        {
+          "name": "Cadastrar conteúdo 3",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Conteúdo 3\",\n  \"corpo\": \"Texto de exemplo 3\",\n  \"autor\": \"Carla\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/conteudos" }
+          }
+        },
+        {
+          "name": "Cadastrar conteúdo 4",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Conteúdo 4\",\n  \"corpo\": \"Texto de exemplo 4\",\n  \"autor\": \"Diego\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/conteudos" }
+          }
+        },
+        {
+          "name": "Cadastrar conteúdo 5",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Conteúdo 5\",\n  \"corpo\": \"Texto de exemplo 5\",\n  \"autor\": \"Elisa\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/conteudos" }
+          }
+        },
+        {
+          "name": "Cadastrar conteúdo 6",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Conteúdo 6\",\n  \"corpo\": \"Texto de exemplo 6\",\n  \"autor\": \"Felipe\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/conteudos" }
+          }
+        },
+        {
+          "name": "Cadastrar conteúdo 7",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Conteúdo 7\",\n  \"corpo\": \"Texto de exemplo 7\",\n  \"autor\": \"Gabriela\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/conteudos" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - HIT, MISS e LRU",
+      "description": "Execute as chamadas nesta ordem para encher o cache, tornar o ID 1 recente e provocar a remoção LRU do ID 2 ao buscar o ID 6.",
+      "item": [
+        {
+          "name": "GET 1 - primeira busca (MISS)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/1" } }
+        },
+        {
+          "name": "GET 1 - segunda busca (HIT)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/1" } }
+        },
+        {
+          "name": "GET 2 - MISS",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/2" } }
+        },
+        {
+          "name": "GET 3 - MISS",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/3" } }
+        },
+        {
+          "name": "GET 4 - MISS",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/4" } }
+        },
+        {
+          "name": "GET 5 - MISS",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/5" } }
+        },
+        {
+          "name": "GET 1 - HIT (atualiza LRU)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/1" } }
+        },
+        {
+          "name": "GET 6 - MISS (remove o menos recente)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/6" } }
+        },
+        {
+          "name": "GET 2 - MISS (confirma que saiu do cache)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/2" } }
+        }
+      ]
+    },
+    {
+      "name": "03 - Invalidação com PUT",
+      "description": "O ID 1 ainda deve estar no cache após a sequência LRU. O PUT o invalida; o GET seguinte deve retornar X-Cache: MISS.",
+      "item": [
+        {
+          "name": "GET 1 - HIT antes do PUT",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/1" } }
+        },
+        {
+          "name": "PUT 1 - atualizar e invalidar",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Conteúdo 1 atualizado\",\n  \"corpo\": \"Texto atualizado pelo PUT\",\n  \"autor\": \"Ana\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/conteudos/1" }
+          }
+        },
+        {
+          "name": "GET 1 - MISS depois do PUT",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/1" } }
+        }
+      ]
+    },
+    {
+      "name": "04 - TTL (execute manualmente)",
+      "description": "Execute o primeiro GET para carregar o item no cache. Aguarde o TTL configurado (60 s por padrão; ou 10 s se alterou a propriedade) e execute o segundo GET: deve ser MISS.",
+      "item": [
+        {
+          "name": "GET 7 - aquecer cache",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/7" } }
+        },
+        {
+          "name": "GET 7 - repetir somente após o TTL",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/conteudos/7" } }
+        }
+      ]
+    },
+    {
+      "name": "05 - Estatísticas e limpeza",
+      "item": [
+        {
+          "name": "GET estatísticas do cache",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/cache/estatisticas" } }
+        },
+        {
+          "name": "DELETE limpar cache",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/cache" } }
+        }
+      ]
+    }
+  ]
+}
