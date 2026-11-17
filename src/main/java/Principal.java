@@ -1,3 +1,5 @@
+import hashmap.api.util.MeuMapa;
+
 public class Principal {
 
     public static void main(String[] args) {

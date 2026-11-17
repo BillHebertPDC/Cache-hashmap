@@ -1,9 +1,8 @@
 package hashmap.api.cache;
 
 import hashmap.api.model.Conteudo;
-import java.util.Comparator;
+import hashmap.api.util.MeuMapa;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,7 @@ public class ConteudoCache {
 
     private static final Logger log = LoggerFactory.getLogger(ConteudoCache.class);
 
-    private final ConcurrentHashMap<Long, EntradaCache> itens = new ConcurrentHashMap<>();
+    private final MeuMapa<Long, EntradaCache> itens = new MeuMapa<>();
     private final int limite;
     private final long ttlMillis;
     private final ThreadLocal<Boolean> ultimoHit = ThreadLocal.withInitial(() -> false);
@@ -40,7 +39,7 @@ public class ConteudoCache {
 
         if (entrada == null || agora - entrada.armazenadoEm >= ttlMillis) {
             if (entrada != null) {
-                itens.remove(id, entrada);
+                itens.remove(id);
                 log.info("Cache TTL expirado - id={}", id);
             }
             misses++;
@@ -56,21 +55,25 @@ public class ConteudoCache {
 
     public synchronized void armazenar(Conteudo conteudo) {
         long agora = System.currentTimeMillis();
-        for (Map.Entry<Long, EntradaCache> item : itens.entrySet()) {
-            if (agora - item.getValue().armazenadoEm >= ttlMillis) {
-                itens.remove(item.getKey(), item.getValue());
+        for (MeuMapa.Entrada<Long, EntradaCache> item : itens.entradas()) {
+            if (agora - item.valor().armazenadoEm >= ttlMillis) {
+                itens.remove(item.chave());
             }
         }
 
         if (!itens.containsKey(conteudo.getId()) && itens.size() >= limite) {
-            Map.Entry<Long, EntradaCache> menosUsada = itens.entrySet().stream()
-                    .min(Comparator.comparingLong(item -> item.getValue().ultimoAcesso))
-                    .orElse(null);
+            MeuMapa.Entrada<Long, EntradaCache> menosUsada = null;
+            for (MeuMapa.Entrada<Long, EntradaCache> item : itens.entradas()) {
+                if (menosUsada == null
+                        || item.valor().ultimoAcesso < menosUsada.valor().ultimoAcesso) {
+                    menosUsada = item;
+                }
+            }
 
             if (menosUsada != null) {
-                itens.remove(menosUsada.getKey(), menosUsada.getValue());
+                itens.remove(menosUsada.chave());
                 evictions++;
-                log.info("Cache EVICTION - id={} - motivo=LRU", menosUsada.getKey());
+                log.info("Cache EVICTION - id={} - motivo=LRU", menosUsada.chave());
             }
         }
 
